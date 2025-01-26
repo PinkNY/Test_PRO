@@ -1,39 +1,62 @@
 // src/pages/RequestList.js
 import React, { useState } from "react";
-import { Container, Typography, Button, Grid } from "@mui/material";
+import { Container, Typography, Button } from "@mui/material";
+import RequestListStyles from "./styles/RequestListStyle";
 
 const RequestList = () => {
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("전체"); // 필터 기본값 설정
+
+  // 요청 데이터
   const requests = [
-    { id: 1, title: "Video Editing", status: "Pending" },
-    { id: 2, title: "Motion Graphics", status: "In Progress" },
-    { id: 3, title: "Subtitle Editing", status: "Completed" },
+    { id: 1, title: "영상 편집", status: "대기 중" },
+    { id: 2, title: "모션 그래픽", status: "진행 중" },
+    { id: 3, title: "자막 편집", status: "완료" },
   ];
 
+  // 필터링된 요청 데이터
   const filteredRequests =
-    filter === "all"
+    filter === "전체"
       ? requests
-      : requests.filter((req) => req.status === filter);
+      : requests.filter((request) => request.status === filter);
 
   return (
-    <Container>
+    <Container sx={RequestListStyles.container}>
       <Typography variant="h4" gutterBottom>
-        Request List
+        요청 목록
       </Typography>
-      <Button onClick={() => setFilter("all")}>All</Button>
-      <Button onClick={() => setFilter("Pending")}>Pending</Button>
-      <Button onClick={() => setFilter("In Progress")}>In Progress</Button>
-      <Button onClick={() => setFilter("Completed")}>Completed</Button>
-      <Grid container spacing={3} style={{ marginTop: "20px" }}>
-        {filteredRequests.map((req) => (
-          <Grid item xs={12} md={4} key={req.id}>
-            <div style={{ border: "1px solid #ccc", padding: "20px" }}>
-              <Typography variant="h6">{req.title}</Typography>
-              <Typography variant="body1">{req.status}</Typography>
-            </div>
-          </Grid>
+      {/* 필터 버튼 */}
+      <div style={RequestListStyles.filterButtons}>
+        {["전체", "대기 중", "진행 중", "완료"].map((status) => (
+          <Button
+            key={status}
+            variant="outlined"
+            color={filter === status ? "primary" : "inherit"}
+            onClick={() => setFilter(status)}
+            sx={RequestListStyles.button}
+          >
+            {status}
+          </Button>
         ))}
-      </Grid>
+      </div>
+      {/* 요청 카드 */}
+      <div style={RequestListStyles.cardContainer}>
+        {filteredRequests.map((request) => (
+          <div key={request.id} style={RequestListStyles.card}>
+            <Typography variant="h6">{request.title}</Typography>
+            <Typography
+              sx={
+                request.status === "대기 중"
+                  ? RequestListStyles.statusPending
+                  : request.status === "진행 중"
+                  ? RequestListStyles.statusInProgress
+                  : RequestListStyles.statusCompleted
+              }
+            >
+              {request.status}
+            </Typography>
+          </div>
+        ))}
+      </div>
     </Container>
   );
 };
