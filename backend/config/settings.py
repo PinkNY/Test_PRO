@@ -25,11 +25,12 @@ SECRET_KEY = 'django-insecure-yciyp)posp%1*2usq!3#%fx9^bx5qqg1ql=2u$1&)5-@u(pvm_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
+# 애플리케이션 등록
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,11 +38,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # 추가 앱
+    'rest_framework',  # Django REST Framework
+    'rest_framework_simplejwt',  # JWT 인증
+    'corsheaders',  # CORS 처리
+    'profiles_app',
+    'requests_app',
+    'users_app',
 ]
 
+# 미들웨어 설정
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # CORS 미들웨어 추가
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -73,12 +84,39 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# MySQL 데이터베이스 설정
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'default_db',
+        'USER': 'root',
+        'PASSWORD': '1234',  # 실제 사용할 비밀번호로 변경
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {'charset': 'utf8mb4'},
+    },
+    'requests_db': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'requests_db',
+        'USER': 'root',
+        'PASSWORD': '1234',  # 실제 사용할 비밀번호로 변경
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {'charset': 'utf8mb4'},
+    },
+    'users_db': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'users_db',
+        'USER': 'root',
+        'PASSWORD': '1234',  # 실제 사용할 비밀번호로 변경
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {'charset': 'utf8mb4'},
+    },
 }
+
+# 기본 데이터베이스 연결 설정
+DATABASE_ROUTERS = ['config.db_router.DBRouter']
 
 
 # Password validation
@@ -103,19 +141,44 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+# 국제화 설정
+LANGUAGE_CODE = 'ko-kr'
+TIME_ZONE = 'Asia/Seoul'
 USE_I18N = True
-
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# JWT 인증 설정
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',  # 기본적으로 인증된 사용자만 접근 가능
+    ),
+}
+
+# CORS 설정 (프론트엔드와 연동할 때 필요)
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React 프론트엔드 도메인
+]
+CORS_ALLOW_CREDENTIALS = True
+
+# JWT 토큰 설정
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),  # 액세스 토큰 만료 시간
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # 리프레시 토큰 만료 시간
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
